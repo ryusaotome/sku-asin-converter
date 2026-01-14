@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>操作マニュアル | SKU→ASIN変換ツール</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Outfit:wght@400;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --accent: #f43f5e;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        .step-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            border: 1px solid #e2e8f0;
+        }
+
+        .step-number {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            width: 32px;
+            height: 32px;
+            text-align: center;
+            line-height: 32px;
+            border-radius: 50%;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .highlight-box {
+            background: #f1f5f9;
+            border-left: 4px solid var(--primary);
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .important {
+            background: #fff1f2;
+            border-left: 4px solid var(--accent);
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 8px 8px 0;
+            color: #9f1239;
+        }
+
+        ul {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        code {
+            background: #e2e8f0;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 60px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            background: #e0e7ff;
+            color: #4338ca;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>操作マニュアル</h1>
+            <p class="subtitle">Amazon広告運用用 SKU→ASIN変換アプリ</p>
+        </header>
+
+        <section class="step-card">
+            <span class="step-number">1</span>
+            <h2>アプリの起動</h2>
+            <p>デスクトップにあるショートカット<strong>「SKUからASIN抽出」</strong>をダブルクリックしてください。</p>
+            <div class="highlight-box">
+                Google Chromeが自動で開き、アプリ画面が表示されます。
+            </div>
+        </section>
+
+        <section class="step-card">
+            <span class="step-number">2</span>
+            <h2>マスターデータの更新（初回のみ推奨）</h2>
+            <p>ASINや商品名を紐付けるための「辞書」を登録します。</p>
+            <div class="important">
+                <strong>推奨データ源:</strong><br>
+                セラーセントラルの「レポート」＞「出品レポート」からダウンロードできる<strong>「出品詳細レポート」</strong>をそのまま使用してください。
+            </div>
+            <ul>
+                <li>レポートの内容を全てコピーして、<strong>「1. マスター更新」</strong>の入力欄に貼り付けます。</li>
+                <li><strong>「マスターを保存」</strong>ボタンを押すと、ブラウザに保存されます。</li>
+                <li>一度保存すれば、次回からこの手順は飛ばせます。</li>
+            </ul>
+        </section>
+
+        <section class="step-card">
+            <span class="step-number">3</span>
+            <h2>SKUの変換</h2>
+            <p>抽出したいSKUのリストを準備します。</p>
+            <ul>
+                <li>変換したいSKUを<strong>「2. 変換対象SKU」</strong>欄に貼り付けます。</li>
+                <li><strong>「ASIN変換実行」</strong>ボタンをクリックします。</li>
+            </ul>
+        </section>
+
+        <section class="step-card">
+            <span class="step-number">4</span>
+            <h2>結果の確認とコピー</h2>
+            <p>画面下部に結果テーブルが表示されます。</p>
+            <div class="highlight-box">
+                <strong>コピー機能の使い分け:</strong>
+                <ul>
+                    <li><span class="badge">ASINのみコピー</span> : 広告管理画面への入稿に。</li>
+                    <li><span class="badge">タブ区切りコピー</span> : Excelへの貼り付けに。</li>
+                </ul>
+            </div>
+            <p>未ヒット（マスターにないもの）は赤くフラグが立ちます。必要に応じてマスターを最新に更新してください。</p>
+        </section>
+
+        <div class="footer">
+            &copy; 2026 SKU→ASIN Converter Tools
+        </div>
+    </div>
+</body>
+
+</html>

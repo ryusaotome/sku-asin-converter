@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SKU→ASIN変換ツール</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <div class="background-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <main class="app-container">
+        <header class="app-header">
+            <div class="header-top">
+                <button id="btn-manual" class="btn-small">マニュアルを開く</button>
+            </div>
+            <h1>SKU→ASIN <span class="accent">変換ツール</span></h1>
+            <p class="subtitle">Amazon広告運用用・出品詳細レポート対応</p>
+        </header>
+
+        <section class="master-section glass">
+            <div class="section-header">
+                <h2>1. マスター更新</h2>
+                <span id="master-status" class="status-badge status-missing">未登録</span>
+            </div>
+            <div class="upload-area">
+                <input type="file" id="master-file" accept=".txt,.csv" hidden>
+                <button id="btn-upload" class="btn-secondary">ファイルを選択</button>
+                <span class="or">or</span>
+                <textarea id="master-paste" placeholder="ここにレポートを貼り付け (SKU, ASIN, 商品名)"></textarea>
+            </div>
+            <button id="btn-save-master" class="btn-primary">マスターを保存</button>
+        </section>
+
+        <section class="conversion-section glass">
+            <div class="section-header">
+                <h2>2. 変換対象SKU</h2>
+            </div>
+            <textarea id="sku-input" placeholder="SKUリストを改行区切りで入力してください..."></textarea>
+            <button id="btn-convert" class="btn-action">ASIN変換実行</button>
+        </section>
+
+        <section id="results-section" class="results-section glass hidden">
+            <div class="section-header">
+                <h2>3. 変換結果</h2>
+                <div class="action-group">
+                    <button id="btn-copy-asin" class="btn-small">ASINのみコピー</button>
+                    <button id="btn-copy-full" class="btn-small">タブ区切りコピー</button>
+                </div>
+            </div>
+
+            <div class="table-wrapper">
+                <table id="results-table">
+                    <thead>
+                        <tr>
+                            <th>ASIN</th>
+                            <th>SKU</th>
+                            <th>商品名</th>
+                            <th>未ヒット</th>
+                            <th>複数</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Results populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="missed-skus-container">
+                <h3>未ヒットSKU一覧</h3>
+                <textarea id="missed-skus" readonly></textarea>
+                <button id="btn-copy-missed" class="btn-small">未ヒットSKUをコピー</button>
+            </div>
+        </section>
+    </main>
+
+    <div id="toast" class="toast hidden"></div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
