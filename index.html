@@ -45,10 +45,14 @@
 
         <section class="conversion-section glass">
             <div class="section-header">
-                <h2>2. 変換対象SKU</h2>
+                <h2>2. 変換実行</h2>
+                <div class="mode-tabs">
+                    <button id="tab-sku" class="tab-btn active">SKUを入力</button>
+                    <button id="tab-asin" class="tab-btn">ASINを入力</button>
+                </div>
             </div>
             <textarea id="sku-input" placeholder="SKUリストを改行区切りで入力してください..."></textarea>
-            <button id="btn-convert" class="btn-action">ASIN変換実行</button>
+            <button id="btn-convert" class="btn-action">ASIN/SKU変換実行</button>
         </section>
 
         <section id="results-section" class="results-section glass hidden">

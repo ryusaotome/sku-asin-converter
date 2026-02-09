@@ -8,22 +8,40 @@ document.addEventListener('DOMContentLoaded', () => {
     const skuInput = document.getElementById('sku-input');
     const btnConvert = document.getElementById('btn-convert');
     const btnManual = document.getElementById('btn-manual');
+    const tabSku = document.getElementById('tab-sku');
+    const tabAsin = document.getElementById('tab-asin');
     const resultsSection = document.getElementById('results-section');
     const resultsTableBody = document.querySelector('#results-table tbody');
     const missedSkusTextarea = document.getElementById('missed-skus');
+    const missedSkusTitle = document.querySelector('.missed-skus-container h3');
 
     const btnCopyAsin = document.getElementById('btn-copy-asin');
     const btnCopyFull = document.getElementById('btn-copy-full');
     const btnCopyMissed = document.getElementById('btn-copy-missed');
 
     // State
-    let masterData = {}; // Key: SKU, Value: [{asin, name}, ...]
+    let masterDataBySku = {}; // Key: SKU, Value: [{asin, name}, ...]
+    let masterDataByAsin = {}; // Key: ASIN, Value: [{sku, name}, ...]
+    let currentMode = 'sku'; // 'sku' or 'asin'
 
     // Initialize
     loadMasterFromStorage();
 
     // Event Listeners
     btnUpload.addEventListener('click', () => fileInput.click());
+
+    tabSku.addEventListener('click', () => setMode('sku'));
+    tabAsin.addEventListener('click', () => setMode('asin'));
+
+    function setMode(mode) {
+        currentMode = mode;
+        tabSku.classList.toggle('active', mode === 'sku');
+        tabAsin.classList.toggle('active', mode === 'asin');
+        skuInput.placeholder = mode === 'sku' ?
+            "SKUリストを改行区切りで入力してください..." :
+            "ASINリストを改行区切りで入力してください...";
+        missedSkusTitle.textContent = mode === 'sku' ? "未ヒットSKU一覧" : "未ヒットASIN一覧";
+    }
 
     fileInput.addEventListener('change', (e) => {
         const file = e.target.files[0];
@@ -45,33 +63,34 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const parsed = parseMasterData(rawData);
-        if (Object.keys(parsed).length === 0) {
+        if (Object.keys(parsed.bySku).length === 0) {
             showToast('有効な列名（出品者SKU, ASIN 1）が見つかりません。', 'error');
             return;
         }
 
-        masterData = parsed;
+        masterDataBySku = parsed.bySku;
+        masterDataByAsin = parsed.byAsin;
         saveMasterToStorage();
         updateMasterStatus();
-        showToast(`マスターを更新しました (${Object.keys(masterData).length}件のSKU)`);
+        showToast(`マスターを更新しました (${Object.keys(masterDataBySku).length}件のSKU)`);
     });
 
     btnConvert.addEventListener('click', () => {
-        if (Object.keys(masterData).length === 0) {
+        if (Object.keys(masterDataBySku).length === 0) {
             showToast('先にマスターを登録してください。', 'error');
             return;
         }
 
-        const skus = skuInput.value.split('\n')
+        const inputs = skuInput.value.split('\n')
             .map(s => s.trim())
             .filter(s => s.length > 0);
 
-        if (skus.length === 0) {
-            showToast('変換対象のSKUを入力してください。', 'error');
+        if (inputs.length === 0) {
+            showToast(`${currentMode === 'sku' ? 'SKU' : 'ASIN'}リストを入力してください。`, 'error');
             return;
         }
 
-        const results = convertSKUs(skus);
+        const results = currentMode === 'sku' ? convertSKUs(inputs) : convertASINs(inputs);
         displayResults(results);
     });
 
@@ -96,27 +115,29 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     btnCopyMissed.addEventListener('click', () => {
-        copyToClipboard(missedSkusTextarea.value, '未ヒットSKUをコピーしました');
+        const label = currentMode === 'sku' ? 'SKU' : 'ASIN';
+        copyToClipboard(missedSkusTextarea.value, `未ヒット${label}をコピーしました`);
     });
 
     // Helper Functions
     function parseMasterData(text) {
         const lines = text.split(/\r?\n/).filter(l => l.trim());
-        if (lines.length < 2) return {};
+        if (lines.length < 2) return { bySku: {}, byAsin: {} };
 
         // Detect delimiter (Tab or Comma)
         const header = lines[0];
         const delimiter = header.includes('\t') ? '\t' : (header.includes(',') ? ',' : null);
-        if (!delimiter) return {};
+        if (!delimiter) return { bySku: {}, byAsin: {} };
 
         const cols = header.split(delimiter).map(c => c.trim().replace(/^"|"$/g, ''));
         const idxSKU = cols.findIndex(c => c === '出品者SKU');
         const idxASIN = cols.findIndex(c => c === 'ASIN 1');
         const idxName = cols.findIndex(c => c === '商品名' || c === 'item-name');
 
-        if (idxSKU === -1 || idxASIN === -1) return {};
+        if (idxSKU === -1 || idxASIN === -1) return { bySku: {}, byAsin: {} };
 
-        const data = {};
+        const bySku = {};
+        const byAsin = {};
         for (let i = 1; i < lines.length; i++) {
             const row = lines[i].split(delimiter).map(r => r.trim().replace(/^"|"$/g, ''));
             const sku = row[idxSKU];
@@ -125,18 +146,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (!sku || !asin) continue;
 
-            if (!data[sku]) data[sku] = [];
-            data[sku].push({ asin, name });
+            if (!bySku[sku]) bySku[sku] = [];
+            bySku[sku].push({ asin, name });
+
+            if (!byAsin[asin]) byAsin[asin] = [];
+            byAsin[asin].push({ sku, name });
         }
-        return data;
+        return { bySku, byAsin };
     }
 
     function convertSKUs(skus) {
         return skus.map(sku => {
-            const matches = masterData[sku] || [];
+            const matches = masterDataBySku[sku] || [];
             return {
                 sku: sku,
                 asin: matches.length > 0 ? matches[0].asin : '',
+                name: matches.length > 0 ? matches[0].name : '',
+                missed: matches.length === 0 ? 1 : 0,
+                multiple: matches.length > 1 ? 1 : 0
+            };
+        });
+    }
+
+    function convertASINs(asins) {
+        return asins.map(asin => {
+            const matches = masterDataByAsin[asin] || [];
+            return {
+                asin: asin,
+                sku: matches.length > 0 ? matches[0].sku : '',
                 name: matches.length > 0 ? matches[0].name : '',
                 missed: matches.length === 0 ? 1 : 0,
                 multiple: matches.length > 1 ? 1 : 0
@@ -158,7 +195,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td class="${res.multiple ? 'flag-yes' : ''}">${res.multiple || ''}</td>
             `;
             resultsTableBody.appendChild(tr);
-            if (res.missed) missed.push(res.sku);
+            if (res.missed) {
+                missed.push(currentMode === 'sku' ? res.sku : res.asin);
+            }
         });
 
         missedSkusTextarea.value = missed.join('\n');
@@ -168,7 +207,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function saveMasterToStorage() {
         try {
-            localStorage.setItem('sku_asin_master', JSON.stringify(masterData));
+            const dataToSave = { bySku: masterDataBySku, byAsin: masterDataByAsin };
+            localStorage.setItem('sku_asin_master_v2', JSON.stringify(dataToSave));
         } catch (e) {
             console.error('Storage error:', e);
             showToast('マスターの保存に失敗しました (容量制限の可能性があります)', 'error');
@@ -176,19 +216,38 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function loadMasterFromStorage() {
-        const saved = localStorage.getItem('sku_asin_master');
-        if (saved) {
+        // Try v2 first
+        const savedV2 = localStorage.getItem('sku_asin_master_v2');
+        if (savedV2) {
             try {
-                masterData = JSON.parse(saved);
+                const parsed = JSON.parse(savedV2);
+                masterDataBySku = parsed.bySku;
+                masterDataByAsin = parsed.byAsin;
                 updateMasterStatus();
-            } catch (e) {
-                console.error('Parse error:', e);
-            }
+                return;
+            } catch (e) { console.error('Parse error v2:', e); }
+        }
+
+        // Fallback to v1 and migrate
+        const savedV1 = localStorage.getItem('sku_asin_master');
+        if (savedV1) {
+            try {
+                masterDataBySku = JSON.parse(savedV1);
+                // Rebuild ASIN index
+                masterDataByAsin = {};
+                for (const sku in masterDataBySku) {
+                    masterDataBySku[sku].forEach(item => {
+                        if (!masterDataByAsin[item.asin]) masterDataByAsin[item.asin] = [];
+                        masterDataByAsin[item.asin].push({ sku, name: item.name });
+                    });
+                }
+                updateMasterStatus();
+            } catch (e) { console.error('Parse error v1:', e); }
         }
     }
 
     function updateMasterStatus() {
-        const count = Object.keys(masterData).length;
+        const count = Object.keys(masterDataBySku).length;
         if (count > 0) {
             masterStatus.textContent = `${count}件 登録済み`;
             masterStatus.className = 'status-badge status-valid';
